@@ -25,9 +25,29 @@ router.post(
 );
 
 router.post("/login", userController.Login);
-router.post("/logout", userController.Logout);
+// router.post("/logout", userController.Logout);
 router.post("/forgot-password", userController.forgetPassword);
 router.post("/reset-password", userController.resetPassword);
 router.get("/profile", authenticateToken, userController.getProfile);
+
+// update name only
+router.put("/profile", authenticateToken, userController.updateProfile);
+
+// change photo  
+router.put(
+  "/profile/photo",
+  authenticateToken,
+  userController.uploadProfilePhoto,
+  userController.updatePhoto
+);
+
+// remove photo
+router.delete("/profile/photo", authenticateToken, userController.removePhoto);
+
+// delete account
+router.delete("/profile", authenticateToken, userController.deleteAccount);
+
+// logout from all devices
+router.post("/logout-all", authenticateToken, userController.logoutAllDevices);
 
 module.exports = router;

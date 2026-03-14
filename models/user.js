@@ -19,6 +19,30 @@ const userSchema = mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
+  profilePhoto: {
+    type: String,
+    default: null,
+  },
+  googleId: {
+    type: String,
+    default: null,
+  },
+  facebookId: {
+    type: String,
+    default: null,
+  },
+  appleId: {
+    type: String,
+    default: null,
+  },
+  tokenVersion: {
+    type: Number,
+    default: 0,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
