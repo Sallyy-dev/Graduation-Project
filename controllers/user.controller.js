@@ -6,10 +6,8 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
- 
 
-
-// ─── Multer Config for Profile Photo ────────────────────────────────────────
+//Multer Config for Profile Photo
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = "uploads/profiles";
@@ -23,7 +21,7 @@ const storage = multer.diskStorage({
     cb(null, `profile_${req.user.id}_${Date.now()}${ext}`);
   },
 });
- 
+
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
   if (allowedTypes.includes(file.mimetype)) {
@@ -32,13 +30,13 @@ const fileFilter = (req, file, cb) => {
     cb(new Error("Only image files are allowed (jpeg, png, jpg, webp)"), false);
   }
 };
- 
+
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, 
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
- 
+
 // Export the upload middleware so you can use it in routes
 const uploadProfilePhoto = upload.single("photo");
 
@@ -131,13 +129,13 @@ const logoutAllDevices = async (req, res) => {
     await User.findByIdAndUpdate(req.user.id, {
       $inc: { tokenVersion: 1 },
     });
- 
+
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
       sameSite: "Strict",
     });
- 
+
     res.json({
       success: true,
       message: "Logged out from all devices successfully",
@@ -157,12 +155,12 @@ const forgetPassword = async (req, res) => {
     }
 
     const { accessToken } = generateTokens(user);
-    const resetLink = `http://localhost:3000/api/user/reset-password?token=${accessToken}`;
+    const resetLink = `http://localhost:3000/reset-password?token=${accessToken}`;
 
     await sendEmail(
       email,
       "Password Reset",
-      `Click here to reset your password: ${resetLink}`
+      `Click here to reset your password: ${resetLink}`,
     );
     res.json({ message: "Password reset link sent to your email" });
   } catch (err) {
@@ -203,12 +201,14 @@ const resetPassword = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "-password -refreshToken"
+      "-password -refreshToken",
     );
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
- 
+
     res.json({
       success: true,
       user: {
@@ -227,12 +227,12 @@ const getProfile = async (req, res) => {
 // Update Profile UserName
 const updateProfile = async (req, res) => {
   try {
-    const { userName } = req.body; 
+    const { userName } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       { userName },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).select("-password -refreshToken");
 
     res.json({
@@ -259,12 +259,14 @@ const updatePhoto = async (req, res) => {
         .status(400)
         .json({ success: false, message: "No image file provided" });
     }
- 
+
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
- 
+
     // Delete old photo from disk if it exists
     if (user.profilePhoto) {
       const oldPhotoPath = path.join(__dirname, "..", user.profilePhoto);
@@ -272,12 +274,12 @@ const updatePhoto = async (req, res) => {
         fs.unlinkSync(oldPhotoPath);
       }
     }
- 
+
     // Save new photo path (relative, so the frontend can build the full URL)
     const photoPath = `uploads/profiles/${req.file.filename}`;
     user.profilePhoto = photoPath;
     await user.save();
- 
+
     res.json({
       success: true,
       message: "Profile photo updated successfully",
@@ -293,24 +295,26 @@ const removePhoto = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
- 
+
     if (!user.profilePhoto) {
       return res
         .status(400)
         .json({ success: false, message: "No profile photo to remove" });
     }
- 
+
     // Delete photo file from disk
     const photoPath = path.join(__dirname, "..", user.profilePhoto);
     if (fs.existsSync(photoPath)) {
       fs.unlinkSync(photoPath);
     }
- 
+
     user.profilePhoto = null;
     await user.save();
- 
+
     res.json({
       success: true,
       message: "Profile photo removed successfully",
@@ -325,9 +329,11 @@ const deleteAccount = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
- 
+
     // Delete profile photo from disk if exists
     if (user.profilePhoto) {
       const photoPath = path.join(__dirname, "..", user.profilePhoto);
@@ -335,16 +341,16 @@ const deleteAccount = async (req, res) => {
         fs.unlinkSync(photoPath);
       }
     }
- 
+
     await User.findByIdAndDelete(req.user.id);
- 
+
     // Clear the refresh token cookie
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
       sameSite: "Strict",
     });
- 
+
     res.json({
       success: true,
       message: "Account deleted successfully",
@@ -353,7 +359,6 @@ const deleteAccount = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
- 
 
 module.exports = {
   Register,

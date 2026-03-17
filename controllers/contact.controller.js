@@ -14,15 +14,12 @@ const sendContact = async (req, res) => {
       });
     }
 
-    // حفظ في الـ Database
     const contact = await Contact.create({
       user: req.user.id,
       userName,
       email,
       comment,
     });
-
-    // بعت إيميل للأدمن
     await sendEmail(
       process.env.ADMIN_EMAIL,
       `New Contact Message from ${userName}`,
@@ -56,7 +53,6 @@ const sendContact = async (req, res) => {
 // ─── Get All Contacts (admin only) ───────────────────────────────────────────
 const getAllContacts = async (req, res) => {
   try {
-    // التأكد إن اليوزر admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -66,7 +62,7 @@ const getAllContacts = async (req, res) => {
 
     const contacts = await Contact.find()
       .populate("user", "userName email")
-      .sort({ createdAt: -1 }); // الأحدث أول
+      .sort({ createdAt: -1 }); 
 
     res.json({
       success: true,
