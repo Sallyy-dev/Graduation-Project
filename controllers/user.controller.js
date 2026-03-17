@@ -155,7 +155,7 @@ const forgetPassword = async (req, res) => {
     }
 
     const { accessToken } = generateTokens(user);
-    const resetLink = `http://localhost:3000/reset-password?token=${accessToken}`;
+    const resetLink = `http://localhost:5173/reset-password?token=${accessToken}`;
 
     await sendEmail(
       email,
