@@ -29,12 +29,12 @@ app.use(passport.initialize());
 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 /* ================== DB Connection ================== */
-// app.use(async (req, res, next) => {
-//   await connectDB();
-//   next();
-// });
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 /* ================== DB Connection ================== */
-connectDB();
+// connectDB();
 
 /* ================== Routes ================== */
 app.use("/api/user", require("../routes/user.routes"));
