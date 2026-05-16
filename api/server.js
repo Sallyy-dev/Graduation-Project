@@ -7,6 +7,7 @@ const path = require("path");
 const passport = require("../config/passport");
 const socialRoutes = require("../routes/socialAuth.routes");
 
+
 const connectDB = require("../config/db");
 const { globalErrorHandler } = require("../middlewares/errorHandeling");
 
@@ -46,6 +47,7 @@ app.use("/api/coupons", require("../routes/coupon.routes"));
 app.use("/api/slides", require("../routes/slide.routes"));
 app.use("/api/contact", require("../routes/contact.routes"))
 app.use("/api/user", socialRoutes);
+app.use("/api/auth", require("../routes/otp.routes"));
 /* ================== Test Route ================== */
 app.get("/", (req, res) => {
   res.json({ message: "API is working on Vercel" });

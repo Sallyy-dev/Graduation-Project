@@ -2,6 +2,12 @@ const Order = require("../models/order");
 const CateItem = require("../models/cateItem");
 const Cart = require("../models/cart");
 const Coupon = require("../models/coupon");
+const {
+  authenticate,
+  registerOrder,
+  generatePaymentKey,
+  iframeUrl
+} = require("../utils/paymob"); 
 
 /**
  * CREATE ORDER
@@ -9,6 +15,7 @@ const Coupon = require("../models/coupon");
 const createOrder = async (req, res) => {
   const userId = req.user.id;
   const { items, deliveryInfo, couponCode } = req.body;
+  const { paymentMethod } = req.body;
 
   if (!items || !items.length) {
     return res.status(400).json({ message: "Items are required" });
@@ -124,7 +131,7 @@ const createOrder = async (req, res) => {
       finalPrice,
       coupon: couponData,
       deliveryInfo,
-      paymentMethod: "cash",
+      paymentMethod: paymentMethod,
       paymentStatus: "unpaid",
       currency: "EGP",
     });

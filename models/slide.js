@@ -6,7 +6,7 @@ const slideSchema = new mongoose.Schema(
     description: { type: String },
     image: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Slide", slideSchema);

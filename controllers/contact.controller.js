@@ -1,12 +1,14 @@
 const Contact = require("../models/contactus");
 const sendEmail = require("../utils/sendEmail");
 
-// ─── Send Contact Message (authenticated only) ────────────────────────────────
+// ==========================
+// Send Contact Message
 const sendContact = async (req, res) => {
   try {
+    // Extract data from request body
     const { userName, email, comment } = req.body;
 
-    // Validation
+    // Validate required fields
     if (!userName || !email || !comment) {
       return res.status(400).json({
         success: false,
@@ -14,12 +16,15 @@ const sendContact = async (req, res) => {
       });
     }
 
+    // Create new contact message in database
     const contact = await Contact.create({
       user: req.user.id,
       userName,
       email,
       comment,
     });
+
+    // Send email notification to admin
     await sendEmail(
       process.env.ADMIN_EMAIL,
       `New Contact Message from ${userName}`,
@@ -31,12 +36,14 @@ const sendContact = async (req, res) => {
         Comment : ${comment}
 
         Submitted at: ${new Date().toLocaleString()}
-      `
+      `,
     );
 
+    // Return success response
     res.status(201).json({
       success: true,
       message: "Your message has been sent successfully",
+
       contact: {
         id: contact._id,
         userName: contact.userName,
@@ -46,13 +53,19 @@ const sendContact = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    // Handle server errors
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// ─── Get All Contacts (admin only) ───────────────────────────────────────────
+// Get All Contact Messages
+// (Admin Only)
 const getAllContacts = async (req, res) => {
   try {
+    // Check if authenticated user is admin
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -60,23 +73,31 @@ const getAllContacts = async (req, res) => {
       });
     }
 
+    // Fetch all contacts with user info
     const contacts = await Contact.find()
       .populate("user", "userName email")
-      .sort({ createdAt: -1 }); 
+      .sort({ createdAt: -1 });
 
+    // Return contacts list
     res.json({
       success: true,
       total: contacts.length,
       contacts,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    // Handle server errors
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-// ─── Mark as Reviewed (admin only) ───────────────────────────────────────────
+// Mark Contact as Reviewed
+// (Admin Only)
 const markAsReviewed = async (req, res) => {
   try {
+    // Check admin authorization
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -84,12 +105,14 @@ const markAsReviewed = async (req, res) => {
       });
     }
 
+    // Update contact status to reviewed
     const contact = await Contact.findByIdAndUpdate(
       req.params.id,
       { status: "reviewed" },
-      { new: true }
+      { new: true },
     );
 
+    // Check if contact message exists
     if (!contact) {
       return res.status(404).json({
         success: false,
@@ -97,14 +120,23 @@ const markAsReviewed = async (req, res) => {
       });
     }
 
+    // Return success response
     res.json({
       success: true,
       message: "Marked as reviewed",
       contact,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    // Handle server errors
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
-module.exports = { sendContact, getAllContacts, markAsReviewed };
+module.exports = {
+  sendContact,
+  getAllContacts,
+  markAsReviewed,
+};
