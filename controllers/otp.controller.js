@@ -2,7 +2,7 @@ const OTP = require("../models/otpModel");
 const otpGenerator = require("otp-generator");
 const sendEmail = require("../utils/sendEmail");
 
-// ================= SEND OTP =================
+// SEND OTP 
 const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -22,7 +22,7 @@ const sendOTP = async (req, res) => {
       specialChars: false,
     });
 
-    // 🔥 delete old OTPs (important for resend)
+    // delete old OTPs (important for resend)
     await OTP.deleteMany({ email });
 
     // save new OTP
